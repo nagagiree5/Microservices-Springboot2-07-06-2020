@@ -1,0 +1,146 @@
+28-05-2020:
+
+http://localhost:2222/Netflix/user/register
+http://localhost:2222/Netflix/user/login
+http://localhost:2222/Netflix/user/update
+http://localhost:2222/Netflix/user/delete?phoneNor=8500874007
+http://localhost:2222/Netflix/user/viewProfile/9492011956
+
+http://localhost:2222/Netflix/user/update/plan
+{
+"phoneNor":"8500874004",
+"planId":"Netflix-Basic"
+}
+
+{
+"phoneNor":"9492011956",
+"userName":"Nagagiri",
+"password":"nagagiri",
+"email":"nagagirigollapalli@gmail.com",
+"planId":"Netflix-Basic"
+}
+{
+"phoneNor":"8500874004",
+"userName":"xxxxx",
+"password":"xxxxx",
+"email":"xxxxxx@gmail.com",
+"planId":"Netflix-Mobile"
+}
+
+http://localhost:2222/Netflix/user/viewProfile/9492011956
+{
+    "phoneNor": "9492011956",
+    "userName": "Nagagiri",
+    "email": "nagagirigollapalli@gmail.com",
+    "planId": "Netflix-Basic",
+    "currentPlan": {
+        "planId": "Netflix-Basic",
+        "planName": "Basic",
+        "pricePerMonth": "Rs 499",
+        "featuresProvide": "1-screen support, HD content, access across all platforms"
+    },
+    "devicesConnected": [
+        {
+            "device": "SamsungJ6+"
+        },
+        {
+            "device": "OppoF11Pro"
+        }
+    ]
+}
+
+
+
+02-06-2020:
+spring-cloud-config-client make it our microservices as config clients
+
+Before going to load application.properties., It wi be load bootstrap.yml
+BootstrapContex is created spring cloud
+BootstrapContex perent of application context both going to share one enviroment only
+Bootstrap file properties get more priority then application.properties
+bootstrap.yml
+-------------------------------------------------------------------------------------------------
+spring:
+   cloud:
+     config:
+       uri: http://localhost:1111/ConfigServer
+-------------------------------------------------------------------------------------------------
+
+bootstrap.properties
+-------------------------------------------------------------------------------------------------
+spring.cloud.config.uri=http://localhost:1111/ConfigServer
+
+-------------------------------------------------------------------------------------------------
+
+<spring-cloud.version>Hoxton.SR5</spring-cloud.version>
+
+	<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-config-client</artifactId>
+		</dependency>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-dependencies</artifactId>
+				<version>${spring-cloud.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+
+
+	<!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-actuator -->
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-actuator</artifactId>
+    </dependency>
+
+In application.properties or else bootstrap.properties file or git repository common properties...
+#Actuator properties
+management.endpoints.web.exposure.include=*
+
+
+Spring Cloud Config clints:
+
+-->To load common application properties from config server..,At that time of before application context is created...
+   Mean by before context is created all common properties loaded from config server...
+
+Steps:-
+1>Add version,cloud dependancy,management,repository in pom.xml of maven project...
+2>Add Config Clint and Actuator dependencies...
+3>Remove all common application properties in application.properties..,If keep it no problem but more preority get bootstrap.properties file...
+4>Create a new file bootstrap.properties for load common application properties from config server....
+5>Enable Actuator endpoints...
+6>Add SpringbootApplication class on top of class @RefreshScope...
+
+Note:-
+*When properties change in Git it is automatically updated in config server but not microservices(config clints)...
+*To load or update the changes to microservices(config clints)..,
+ Send a POST request thru Postman to the actuator endpoint...
+          http://localhost:<port>/<context-path>/<actuator>/<refresh>    -->POST
+*If spring cloud bus,RabbitSrver(Message Server),Eureka Server in real time intimate to microservice and that changes effected in microservices 1000 of microservices like this...
+
+
+
+http://localhost:2222/Netflix/actuator/refresh    --POST
+http://localhost:2222/Netflix/user/viewProfile/9492011956
+[
+    "config.client.version",
+    "spring.jpa.show-sql"
+]
+
+
+
+http://localhost:2222/Netflix/Netflix/tenures
+http://localhost:2222/Netflix/Netflix/actuator/refresh    --POST
+[
+    "config.client.version",
+    "spring.jpa.show-sql"
+]
+
+http://localhost:2222/Netflix/actuator/refresh
+@RefreshScope
